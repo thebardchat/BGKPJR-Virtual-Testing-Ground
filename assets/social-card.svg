@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e14"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#g)"/>
+  <g stroke="#00e5ff" stroke-opacity="0.15" fill="none">
+    <path d="M80 520 L1200 120"/>
+    <circle cx="200" cy="480" r="40"/>
+    <circle cx="1080" cy="160" r="18"/>
+  </g>
+  <text x="80" y="120" fill="#00e5ff" font-family="Orbitron,sans-serif" font-size="42" font-weight="700">BGKPJR · VIRTUAL TESTING GROUND</text>
+  <text x="80" y="180" fill="#e5e7eb" font-family="Space Grotesk,sans-serif" font-size="28">Sniper scale → VacuumGate · similarity laws</text>
+  <text x="80" y="560" fill="#9ca3af" font-family="JetBrains Mono,monospace" font-size="18">lock_G = 4 · L buys v · patent ≤5G</text>
+</svg>
