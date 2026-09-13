@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>BGKPJR · Virtual Testing Ground</title>
+<meta name="description" content="Sniper-scale digital playground for BGKPJR launch-rail similarity laws. Size up from long-barrel stand to VacuumGate 37 km."/>
+<meta property="og:title" content="BGKPJR Virtual Testing Ground"/>
+<meta property="og:description" content="lock_G = 4 · L buys v · prove relative propulsion before steel"/>
+<meta property="og:image" content="assets/social-card.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@600;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0e14; --panel:#111827; --line:#1f2937; --cyan:#00e5ff; --text:#e5e7eb;
+  --muted:#9ca3af; --ok:#3ddc84; --fail:#ff5c7a; --warn:#fbbf24;
+}
+* { box-sizing: border-box; }
+body {
+  margin:0; background: radial-gradient(1200px 600px at 20% -10%, #0d2137 0%, var(--bg) 55%);
+  color: var(--text); font-family: "Space Grotesk", system-ui, sans-serif; min-height:100vh;
+}
+.grid-bg {
+  position:fixed; inset:0; pointer-events:none; opacity:.35;
+  background-image:
+    linear-gradient(rgba(0,229,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+header {
+  position:relative; z-index:1; padding:2rem 1.25rem 1rem; max-width:1100px; margin:0 auto;
+}
+h1 {
+  font-family: Orbitron, sans-serif; font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing:.04em; margin:0 0 .4rem; color:var(--cyan);
+}
+.tag { color:var(--muted); font-family:"JetBrains Mono", monospace; font-size:.85rem; }
+nav { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.6rem; }
+nav a {
+  color:var(--cyan); text-decoration:none; font-size:.85rem; border:1px solid rgba(0,229,255,.35);
+  padding:.35rem .7rem; border-radius:999px;
+}
+nav a:hover { background:rgba(0,229,255,.1); }
+main { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 1.25rem 3rem;
+  display:grid; gap:1rem; grid-template-columns: 1.1fr .9fr; }
+@media (max-width:900px){ main { grid-template-columns:1fr; } }
+.card {
+  background:rgba(17,24,39,.92); border:1px solid var(--line); border-radius:14px; padding:1.1rem 1.2rem;
+  box-shadow: 0 0 0 1px rgba(0,229,255,.04), 0 20px 50px rgba(0,0,0,.35);
+}
+.card h2 { font-family:Orbitron,sans-serif; font-size:.95rem; color:var(--cyan); margin:0 0 .8rem; letter-spacing:.06em; }
+label { display:block; font-size:.75rem; color:var(--muted); margin:.55rem 0 .2rem; font-family:"JetBrains Mono",monospace; }
+select, input[type=range], input[type=number] { width:100%; }
+select, input[type=number] {
+  background:#0a0e14; border:1px solid var(--line); color:var(--text); border-radius:8px;
+  padding:.5rem .6rem; font-family:"JetBrains Mono",monospace;
+}
+.modes { display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:.4rem; }
+.modes button {
+  flex:1; min-width:90px; background:#0a0e14; border:1px solid var(--line); color:var(--muted);
+  border-radius:8px; padding:.45rem; cursor:pointer; font-family:"JetBrains Mono",monospace; font-size:.75rem;
+}
+.modes button.active { border-color:var(--cyan); color:var(--cyan); background:rgba(0,229,255,.08); }
+.hud {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem;
+}
+.hud .cell {
+  background:#0a0e14; border:1px solid var(--line); border-radius:10px; padding:.65rem .7rem;
+}
+.hud .k { font-size:.65rem; color:var(--muted); font-family:"JetBrains Mono",monospace; }
+.hud .v { font-size:1.15rem; font-family:Orbitron,sans-serif; color:var(--text); margin-top:.15rem; }
+.chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.8rem; }
+.chip {
+  font-family:"JetBrains Mono",monospace; font-size:.7rem; padding:.3rem .55rem; border-radius:999px;
+  border:1px solid var(--line);
+}
+.chip.ok { color:var(--ok); border-color:rgba(61,220,132,.45); }
+.chip.fail { color:var(--fail); border-color:rgba(255,92,122,.5); }
+.chip.warn { color:var(--warn); border-color:rgba(251,191,36,.45); }
+canvas {
+  width:100%; height:220px; background:#05070b; border-radius:10px; border:1px solid var(--line);
+  display:block;
+}
+.note { font-size:.8rem; color:var(--muted); line-height:1.45; margin-top:.75rem; }
+.table { width:100%; border-collapse:collapse; font-family:"JetBrains Mono",monospace; font-size:.72rem; }
+.table th, .table td { border-bottom:1px solid var(--line); padding:.4rem .3rem; text-align:right; }
+.table th:first-child, .table td:first-child { text-align:left; }
+.table th { color:var(--muted); font-weight:600; }
+footer { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 1.25rem 2.5rem;
+  color:var(--muted); font-size:.75rem; font-family:"JetBrains Mono",monospace; }
+footer a { color:var(--cyan); }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<header>
+  <h1>VIRTUAL TESTING GROUND</h1>
+  <div class="tag">BGKPJR · sniper barrel → VacuumGate · similarity / scale laws</div>
+  <nav>
+    <a href="https://thebardchat.github.io/BGKPJR-Launch-Vis/">Launch Vis</a>
+    <a href="https://thebardchat.github.io/manna-pods/">manna-pods</a>
+    <a href="https://thebardchat.github.io/tug-pro/">tug-pro</a>
+    <a href="https://github.com/thebardchat/BGKPJR-Core-Simulations/blob/main/docs/SIMILARITY-SCALE-LAWS.md">Scale-law spec</a>
+    <a href="https://thebardchat.github.io/">Hub</a>
+  </nav>
+</header>
+<main>
+  <section class="card">
+    <h2>SCALE SCRUBBER</h2>
+    <label>Preset</label>
+    <select id="preset"></select>
+    <label>Mode</label>
+    <div class="modes" id="modes">
+      <button data-mode="lock_G" class="active">lock_G</button>
+      <button data-mode="lock_v">lock_v</button>
+      <button data-mode="lock_Mach">lock_Mach</button>
+    </div>
+    <label>Length L (m) — <span id="Lval">1.5</span></label>
+    <input type="range" id="L" min="0.5" max="37000" step="0.1" value="1.5"/>
+    <div id="paramG">
+      <label>Peak G n — <span id="Nval">4.0</span></label>
+      <input type="range" id="n" min="0.5" max="8" step="0.1" value="4"/>
+    </div>
+    <div id="paramV" hidden>
+      <label>Exit v (m/s)</label>
+      <input type="number" id="vIn" value="1700" step="10"/>
+    </div>
+    <div id="paramM" hidden>
+      <label>Exit Mach</label>
+      <input type="number" id="machIn" value="5" step="0.1"/>
+    </div>
+    <label>Slug mass m (kg)</label>
+    <input type="number" id="m" value="0.02" step="0.001"/>
+    <label>Bore D (m)</label>
+    <input type="number" id="D" value="0.02" step="0.001"/>
+    <label>Inclination θ (°)</label>
+    <input type="number" id="theta" value="15" min="0" max="90" step="1"/>
+    <p class="note">Default <b>lock_G</b>: same sustained G as VacuumGate. Shorter L → lower exit v. Forcing Mach 5 into a short barrel spikes G — that teaching fail is intentional.</p>
+  </section>
+  <section class="card">
+    <h2>LIVE HUD</h2>
+    <div class="hud" id="hud"></div>
+    <div class="chips" id="chips"></div>
+    <h2 style="margin-top:1.1rem">BARREL · COIL CHASE</h2>
+    <canvas id="viz" width="640" height="220"></canvas>
+    <p class="note" id="lesson"></p>
+  </section>
+  <section class="card" style="grid-column:1/-1">
+    <h2>LOCK_G = 4 LADDER (from spec)</h2>
+    <table class="table" id="ladder"></table>
+    <p class="note">Layer A kinematic similarity. Muzzle IP and 8 T REBCO are <b>not</b> claimed similar at rifle scale — see flags.</p>
+  </section>
+</main>
+<footer>
+  Spec: <a href="https://github.com/thebardchat/BGKPJR-Core-Simulations/blob/main/docs/SIMILARITY-SCALE-LAWS.md">SIMILARITY-SCALE-LAWS.md</a>
+  · Canon: bgkpjr_dimensions.py · Faith. Family. Local AI. · Shane Brazelton
+</footer>
+<script type="module">
+import { PRESETS, solve, fmt, PATENT, VG, G_EARTH } from "./scale.js";
+
+const presetEl = document.getElementById("preset");
+Object.entries(PRESETS).forEach(([k,p]) => {
+  const o = document.createElement("option"); o.value = k; o.textContent = p.label; presetEl.appendChild(o);
+});
+presetEl.value = "RIFLE";
+
+let mode = "lock_G";
+document.getElementById("modes").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  mode = b.dataset.mode;
+  [...document.getElementById("modes").children].forEach(x => x.classList.toggle("active", x===b));
+  document.getElementById("paramG").hidden = mode !== "lock_G";
+  document.getElementById("paramV").hidden = mode !== "lock_v";
+  document.getElementById("paramM").hidden = mode !== "lock_Mach";
+  tick();
+});
+
+presetEl.addEventListener("change", () => {
+  const p = PRESETS[presetEl.value];
+  const L = document.getElementById("L");
+  L.value = p.L; document.getElementById("Lval").textContent = p.L;
+  document.getElementById("D").value = p.D;
+  document.getElementById("m").value = p.m;
+  if (presetEl.value === "VACUUMGATE") {
+    document.getElementById("n").value = 4;
+    document.getElementById("vIn").value = 1700;
+    document.getElementById("machIn").value = 5;
+  }
+  tick();
+});
+
+["L","n","m","D","theta","vIn","machIn"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    if (id==="L") document.getElementById("Lval").textContent = document.getElementById("L").value;
+    if (id==="n") document.getElementById("Nval").textContent = (+document.getElementById("n").value).toFixed(1);
+    tick();
+  });
+});
+
+// Log-ish length scrubber: map slider 0.5..37000 with better feel near rifle
+const Lslider = document.getElementById("L");
+function LfromSlider(raw) {
+  // use log remap when dragging
+  return +raw;
+}
+
+function tick() {
+  const L = +document.getElementById("L").value;
+  const r = solve({
+    L,
+    mode,
+    n: +document.getElementById("n").value,
+    v: +document.getElementById("vIn").value,
+    mach: +document.getElementById("machIn").value,
+    theta: +document.getElementById("theta").value,
+    D: +document.getElementById("D").value,
+    m: +document.getElementById("m").value,
+  });
+  const cells = [
+    ["v exit", fmt(r.v,2)+" m/s"],
+    ["Mach", r.mach.toFixed(3)],
+    ["G load", r.n.toFixed(2)+" G"],
+    ["time t", fmt(r.t,2)+" s"],
+    ["KE", fmt(r.Ek,2)+" J"],
+    ["wall E (η=0.6)", fmt(r.Ewall,2)+" J"],
+    ["q_exit", fmt(r.qe,0)+" Pa"],
+    ["coils Nc", String(r.Nc)],
+    ["s = 0.5·D", r.s.toFixed(4)+" m"],
+  ];
+  document.getElementById("hud").innerHTML = cells.map(([k,v]) =>
+    `<div class="cell"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+
+  const chips = [];
+  chips.push(r.patentPass
+    ? `<span class="chip ok">patent envelope OK</span>`
+    : `<span class="chip fail">patent FAIL</span>`);
+  r.flags.forEach(f => {
+    const cls = f.startsWith("FAIL_") ? "fail" : "warn";
+    chips.push(`<span class="chip ${cls}">${f}</span>`);
+  });
+  if (Math.abs(r.L - VG.L) < 1 && Math.abs(r.v - VG.v) < 20 && Math.abs(r.n - 4) < 0.1)
+    chips.push(`<span class="chip ok">VacuumGate kinematic lock</span>`);
+  document.getElementById("chips").innerHTML = chips.join("");
+
+  document.getElementById("lesson").textContent =
+    mode === "lock_G"
+      ? `At fixed ${r.n.toFixed(1)} G, length buys velocity: v = √(2 n g L). Rifle ${L} m → ${r.v.toFixed(1)} m/s. Full rail needs ~37 km for Mach 5.`
+      : `Holding exit speed fixed into short L drives G = v²/(2 L g₀). Patent hard-caps sustained load at ≤${PATENT.gMax} G.`;
+
+  draw(r);
+}
+
+let latest = null;
+function drawFrame() {
+  const r = latest; if (!r) { requestAnimationFrame(drawFrame); return; }
+  const c = document.getElementById("viz");
+  const ctx = c.getContext("2d");
+  const W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+  const y = H*0.55, x0 = 40, x1 = W-40;
+  ctx.strokeStyle = "rgba(0,229,255,.35)";
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+  const show = Math.min(r.Nc, 40);
+  for (let i=0;i<show;i++){
+    const x = x0 + (i/(Math.max(show-1,1)))*(x1-x0);
+    ctx.strokeStyle = `rgba(0,229,255,${0.2 + 0.6*(i/show)})`;
+    ctx.beginPath(); ctx.ellipse(x, y, 6, 18, 0, 0, Math.PI*2); ctx.stroke();
+  }
+  const period = Math.max(r.t, 0.2);
+  const phase = (performance.now()/1000 % period) / period;
+  const sx = x0 + phase*(x1-x0);
+  ctx.fillStyle = "#00e5ff";
+  ctx.beginPath(); ctx.arc(sx, y, 7, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#9ca3af";
+  ctx.font = "12px JetBrains Mono";
+  ctx.fillText(`L=${r.L} m · Nc=${r.Nc} · phase ${(phase*100)|0}%`, x0, 28);
+  requestAnimationFrame(drawFrame);
+}
+function draw(r) { latest = r; }
+
+// ladder table
+const body = Object.entries(PRESETS).map(([name,p]) => {
+  const r = solve({ L:p.L, mode:"lock_G", n:4, D:p.D, m:p.m });
+  return `<tr><td>${name}</td><td>${r.L}</td><td>${r.v.toFixed(1)}</td><td>${r.mach.toFixed(3)}</td><td>${r.t.toFixed(2)}</td><td>${r.Nc}</td></tr>`;
+}).join("");
+document.getElementById("ladder").innerHTML =
+  `<tr><th>Preset</th><th>L (m)</th><th>v</th><th>Mach</th><th>t (s)</th><th>Nc</th></tr>` + body;
+
+tick();
+requestAnimationFrame(drawFrame);
+</script>
+</body>
+</html>
